@@ -1,0 +1,55 @@
+.yatra-overlay-div{
+    position: fixed;
+    left: 0;
+    top: 0;
+    background-color: rgb(2 2 2 / .7);
+    width: 100%;
+    height: 100%;
+    z-index: 999;
+}
+.yatra-active-place{
+    z-index: 9999;
+    position: relative;
+    box-shadow: 0px 0px 10px 3px #0301335e;
+}
+/* YATRA-MODEL */
+.yatra-display-none{
+    display: none !important;
+}
+#yatra-data-control{
+    transition: .5s ease;
+    box-shadow: 0px 0px 10px 3px #00000087;
+    display: block;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    background: #FFF;
+    width: 20%;
+    border-radius: 2.5px;
+    border: 1px solid #888888b3;
+    position: absolute;
+    z-index: 99999;
+}
+.yatra-data-content{
+    padding: 15px 0px;
+    display: flex;
+    font-size: 20px;
+    font-family: sans-serif;
+}
+.yatra-data-controls{
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+}
+.yatra-data-controls>div:hover{
+    transition: 1s ease;
+    cursor: pointer;
+    background-color: rgba(136, 136, 136, 0.342);
+}
+.yatra-data-controls>div{
+    font-weight: bold;
+    padding: 7.5px 20px;
+    background-color: #002c0054;
+    border-radius:2.5px;
+}
+/* YATRA-MODEL-END */
