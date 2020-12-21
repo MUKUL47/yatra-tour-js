@@ -1,4 +1,5 @@
 .yatra-overlay-div{
+    transition: .5s ease;
     position: fixed;
     left: 0;
     top: 0;
@@ -17,7 +18,7 @@
     display: none !important;
 }
 #yatra-data-control{
-    transition: .5s ease;
+    transition: 1s ease;
     box-shadow: 0px 0px 10px 3px #00000087;
     display: block;
     padding: 10px;
@@ -29,6 +30,8 @@
     border: 1px solid #888888b3;
     position: absolute;
     z-index: 99999;
+    min-width: 8.5em;
+    display: inline-block;
 }
 .yatra-data-content{
     padding: 15px 0px;
@@ -44,12 +47,19 @@
 .yatra-data-controls>div:hover{
     transition: 1s ease;
     cursor: pointer;
-    background-color: rgba(136, 136, 136, 0.342);
+    background-color: rgba(136, 136, 136, 0.123);
 }
 .yatra-data-controls>div{
+    transition: 1s ease;
     font-weight: bold;
     padding: 7.5px 20px;
     background-color: #002c0054;
     border-radius:2.5px;
 }
 /* YATRA-MODEL-END */
+.yatra-hover-element-overlay{
+    transition: .7s ease;
+    z-index: 9999;
+    position: absolute;
+    box-shadow: 0px 0px 0px 3px #ffffffa9;
+}

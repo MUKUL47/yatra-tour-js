@@ -6,14 +6,30 @@ let yatraElements = document.querySelectorAll('[yatra-data]');
 let yatraContentModel = null;
 const globalHeight = window.screen.height;
 const padding = 2.5;
+const yatraHoverElement = createOverlay('yatra-hover-element-overlay');
+let firstTranisition = false;
 function startYatra(){
     resetLastNode()
     const yatraElement = yatraElements[yatraIdx];
-    yatraElement.classList.add('yatra-active-place')
-    // const yatraData = Object.values(yatraElement.attributes).find(attr => attr.nodeName === 'yatra-data').value;
+    if(!firstTranisition){
+        firstTranisition = true;
+        yatraElements[yatraIdx].classList.add('yatra-active-place')
+        yatraHoverElement.addEventListener('transitionend', () => yatraElements[yatraIdx].classList.add('yatra-active-place'))
+    }
     window.scrollTo({ top : yatraElement.offsetTop, left : yatraElement.offsetLeft,  behavior : 'smooth' });
+    // const yatraData = Object.values(yatraElement.attributes).find(attr => attr.nodeName === 'yatra-data').value;
+    setYatraOverlayDiv(yatraElement)
     toggleYatraModel(yatraElement)
     return yatraElement;
+}
+function setYatraOverlayDiv(element){
+    const properties = element.getClientRects()[0];
+    yatraHoverElement.style.width = properties.width+"px";
+    yatraHoverElement.style.borderRadius = element.style.borderRadius+"px";
+    yatraHoverElement.style.borderCollapse = "separate";
+    yatraHoverElement.style.height = properties.height+"px";
+    yatraHoverElement.style.left = element.offsetLeft+"px";;
+    yatraHoverElement.style.top = element.offsetTop+"px";
 }
 function toggleYatraModel(element){
     if(yatraContentModel){
@@ -31,21 +47,21 @@ function toggleYatraModel(element){
 }
 function isDefault(element){
     if(window.innerWidth < (element.offsetLeft + yatraContentModel.offsetWidth)){
-        yatraContentModel.style.left = `${element.offsetWidth + element.offsetLeft - yatraContentModel.offsetWidth}px`; // right
+        yatraContentModel.style.left = `${element.offsetWidth + element.offsetLeft - yatraContentModel.offsetWidth }px`; // right
     }else{
         yatraContentModel.style.left = `${element.offsetLeft}px`;
     }
-    return document.querySelector('html').offsetHeight < (element.offsetHeight + element.offsetTop + yatraContentModel.offsetHeight) //check bottom overflow
+    return window.innerHeight < element.getClientRects()[0].bottom + yatraContentModel.offsetHeight//check bottom overflow
 }
 function resetLastNode(){
     if(lastElement) {
         lastElement.classList.remove('yatra-active-place')
     }
 }
-function createOverlay(){
+function createOverlay(classId){
     const overLay = document.createElement('div');
-    overLay.classList.add('yatra-overlay-div');
-    overLay.id = 'yatra-overlay-div'
+    overLay.classList.add(classId || 'yatra-overlay-div');
+    overLay.id = classId || 'yatra-overlay-div'
     return overLay;
 }
 function createDataModel(){
@@ -60,9 +76,11 @@ function createDataModel(){
     `
 }
 function initializeYatra(){
+    firstTranisition = false;
     first = true
     yatraContentModel = document.getElementById('yatra-data-control');
     document.body.appendChild(createOverlay())
+    document.body.appendChild(yatraHoverElement)
     document.querySelector('button').classList.add('yatra-active-place')
 }
 let first = false;
@@ -76,9 +94,10 @@ function resetYatra(){
 (function(){
     document.getElementById('yatra-data-holder').innerHTML = createDataModel()
     window.addEventListener('resize', e => toggleYatraModel(lastElement))
-    document.getElementById('yatra-data__next').addEventListener('click', e => {
+    setTimeout(() => {
         navigateToNext()
-    })
+    },1000)
+    document.getElementById('yatra-data__next').addEventListener('click', e => navigateToNext())
     document.getElementById('yatra-data__back').addEventListener('click', e => {
         yatraIdx = yatraIdx - 1;
         navigateToNext(true)
