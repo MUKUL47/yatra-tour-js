@@ -1,8 +1,9 @@
 const bodyElement = document.querySelector('body');
 let yatraIdx = -1;
-const limit = document.querySelectorAll('[yatra-data]').length;
+const limit = document.querySelectorAll('.text').length;
 let lastElement = null;
-let yatraElements = document.querySelectorAll('[yatra-data]');
+let yatraElements = document.querySelectorAll('.text');
+console.log(yatraElements)
 let yatraContentModel = null;
 const globalHeight = window.screen.height;
 const padding = 2.5;
@@ -84,30 +85,62 @@ function initializeYatra(){
     document.querySelector('button').classList.add('yatra-active-place')
 }
 let first = false;
-function resetYatra(){
+function resetYatra(){ //remove
     yatraIdx = 0
     document.getElementById('yatra-overlay-div').remove();
     lastElement = null;
     yatraElements.forEach(e => e.classList.remove('yatra-active-place'))
     toggleYatraModel(false)
+    //remove listener
 }
 (function(){
+    start()
+}())
+function start(){
     document.getElementById('yatra-data-holder').innerHTML = createDataModel()
     window.addEventListener('resize', e => toggleYatraModel(lastElement))
-    setTimeout(() => {
-        navigateToNext()
-    },1000)
-    document.getElementById('yatra-data__next').addEventListener('click', e => navigateToNext())
-    document.getElementById('yatra-data__back').addEventListener('click', e => {
-        yatraIdx = yatraIdx - 1;
-        navigateToNext(true)
-    })
-}())
-function navigateToNext(isReverse){
-    if(!first) initializeYatra()
-    if(!isReverse){
-        yatraIdx = yatraIdx + 1;
+    //
+    document.getElementById('yatra-data__next').addEventListener('click', e => next())
+    document.getElementById('yatra-data__back').addEventListener('click', e => previous())
+    next()
+}
+const ee = [
+    {
+        selector : '.text',
+        message : 'This is a text message1'
+    }, {
+        selector : '.text1 .text2',
+        message : 'This is a text message2'
+    }, {
+        selector : '.text3',
+        message : 'This is a text message3'
     }
+]
+
+function filterInitalElements(elements){
+    let els = [];
+    elements.forEach(element => {
+        const selectors = element.selector.split(' ');
+        selectors.forEach(selector => {
+            els.push({ element : document.querySelector(selector), message : element.message })
+        })
+    })
+    return els;
+}
+function previous(){
+    if(!first) initializeYatra()
+    yatraIdx = yatraIdx - 1;
+    toggleYatraModel(false)
+    if(yatraIdx < limit){
+        lastElement = startYatra();
+    }else{
+        debugger
+        resetYatra();
+    }
+}
+function next(){
+    if(!first) initializeYatra()
+    yatraIdx = yatraIdx + 1;
     toggleYatraModel(false)
     if(yatraIdx < limit){
         lastElement = startYatra();
