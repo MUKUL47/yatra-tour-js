@@ -57,20 +57,38 @@ function toggleYatraModel(element){
             return;
         }
         yatraContentModel.classList.remove('yatra-display-none');
-        if(!isDefault(element)){
-            yatraContentModel.style.top = `${element.offsetHeight + element.offsetTop + padding}px`; // bottom
-        }else{
-            yatraContentModel.style.top = `${element.offsetTop - yatraContentModel.offsetHeight - padding}px`; // top
-        }
+        calculatePosition(element);
     }
 }
-function isDefault(element){
-    if(window.innerWidth < (element.offsetLeft + yatraContentModel.offsetWidth)){
-        yatraContentModel.style.left = `${element.offsetWidth + element.offsetLeft - yatraContentModel.offsetWidth }px`; // right
-    }else{
-        yatraContentModel.style.left = `${element.offsetLeft}px`;
+function calculatePosition(element){
+    if(element.getClientRects()[0].height + yatraContentModel.offsetHeight < window.innerHeight){ //check bottom area
+        console.log('bottom free', element.getClientRects()[0].height , yatraContentModel.offsetHeight , window.innerHeight)
+        yatraContentModel.style.top = `${element.getClientRects()[0].height}px`;
+        if(element.getClientRects()[0].left + yatraContentModel.offsetWidth < window.innerWidth){
+            console.log('bottom right free')
+            yatraContentModel.style.left = `${element.getClientRects()[0].left}px`;
+        }else{
+            console.log('bottom left free')
+            yatraContentModel.style.left = `${ element.getClientRects()[0].right - yatraContentModel.offsetWidth}px`;
+        }
+        return
     }
-    return window.innerHeight < element.getClientRects()[0].bottom + yatraContentModel.offsetHeight//check bottom overflow
+    else if(element.getClientRects()[0].top -yatraContentModel.offsetHeight > 0){ //check right area
+        console.log('top free')
+        return
+    }
+    else if(element.getClientRects()[0].right + yatraContentModel.offsetWidth < window.innerWidth){ //check top area
+        console.log('right free')
+        yatraContentModel.style.top = `${element.getClientRects()[0].top}px`;
+        yatraContentModel.style.left = `${ element.getClientRects()[0].left + yatraContentModel.offsetWidth}px`;
+        return
+    }
+    else{ //left area
+        console.log('left free')
+        yatraContentModel.style.top = `${element.getClientRects()[0].top}`;
+        yatraContentModel.style.left = `${ element.getClientRects()[0].left - yatraContentModel.offsetWidth}px`;
+       
+    }
 }
 function resetLastNode(){
     if(lastElement) {
