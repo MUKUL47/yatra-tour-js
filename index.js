@@ -1,1 +1,286 @@
-const YatraIntro=(()=>{let t=null,e=null,n=-1,o=null,a=null,l=null,i=5,s=null,r=!0,d=null,c=null,f=null;const y=function(e,n){t=p(e),n&&"object"==typeof n&&(n.padding&&"number"==typeof n.padding&&(i=n.padding),Object.keys(n).includes("allowSkip")&&(r=n.allowSkip),n.customModal&&(!function(t){try{const e=document.createElement("div");return e.classList.add("validating-custom-modal"),e.innerHTML=t,e.querySelector("validating-custom-modal>#yatra-data-control")&&e.querySelector("#yatra-data-control>#yatra-data-content")&&e.querySelector("#yatra-data-control>#yatra-data__next")&&e.querySelector("#yatra-data-control>#yatra-data__back")}catch(t){return!1}}(n.customModal)?console.error("Invalid custom modal, reverting to default settings..."):s=n.customModal))};return y.prototype.start=function(){m(),g()},y.prototype.next=function(){g()},y.prototype.skip=function(){L()},y.prototype.previous=function(){E()},y.prototype.activeElement=function(){return t[n].e},y.prototype.jumpTo=function(e){if(-1===n&&m(),e>=0&&e<=t.length-1)return n=Number(e),l=x(),b(),void v();console.warn("Invalid index")},y;function u(t){const e=document.createElement("div");return e.classList.add(t),e.id=t,document.body.appendChild(e),e}function m(){n=-1,t=p(elements),document.body.innerHTML+=s||'\n        <div id="yatra-data-control" class="yatra-data-control">\n            <div id="yatra-data-content"></div>\n            <div class="yatra-data-controls">\n                <div id="yatra-data__next">Next</div>\n                <div id="yatra-data__back">Back</div>\n            </div>\n        </div>\n        ',d=document.getElementById("yatra-data-content"),c=document.getElementById("yatra-data__next"),f=document.getElementById("yatra-data__back"),o=document.getElementById("yatra-data-control"),a=u("yatra-hover-element-overlay");const e=u("yatra-overlay-div");r||(e.style.cursor="auto"),function(){window.addEventListener("resize",v,!0),document.getElementById("yatra-overlay-div").addEventListener("click",h.bind(this)),c.addEventListener("click",g.bind(this),!0),f.addEventListener("click",E.bind(this),!0)}()}function p(t){let e=[];return t.forEach((t,n)=>{t.selector.split(" ").forEach((o,a)=>{[...document.getElementsByClassName(o)].forEach((o,l)=>{const i=`YATRA-${n}-${a}-${l}`;o.classList.add(i),e.push({element:i,message:t.message,e:document.getElementsByClassName(i)[0]})})})}),e}function v(){B(l);const e=t[n];e&&w(document.getElementsByClassName(e.element)[0])}function h(){r&&L()}function g(){if(n<t.length-1)return n+=1,b(),void(l=x());L()}function E(){n>0&&(n-=1,l=x()),b()}function L(){n=-1,e=!1,function(){window.removeEventListener("resize",v,!0),document.getElementById("yatra-overlay-div").removeEventListener("click",h.bind(this)),a.removeEventListener("transitionend",()=>{}),t.forEach(t=>document.getElementsByClassName(t.element)[0].classList.remove(t.element)),c.removeEventListener("click",g.bind(this),!0),f.removeEventListener("click",E.bind(this),!0)}(),document.getElementById("yatra-data-control").remove(),document.getElementById("yatra-hover-element-overlay").remove(),document.getElementById("yatra-overlay-div").remove(),$()}function x(){$();const o=document.getElementsByClassName(t[n].element)[0];return e||(e=!0,o.classList.add("yatra-active-place"),a.addEventListener("transitionend",()=>{document.getElementsByClassName(t[n].element)[0].classList.add("yatra-active-place")})),window.scrollTo({top:o.offsetTop,left:o.offsetLeft,behavior:"smooth"}),d.innerHTML=t[n].message,w(o),B(o),o}function b(){0===n?(f.style.opacity="0",f.style.pointerEvents="none"):(f.style.opacity="1",f.style.pointerEvents="all"),n===t.length-1?c.innerHTML="Done":c.innerHTML="Next"}function w(t){window.elementelement=t;const e=t.getClientRects()[0];a.style.width=e.width+"px",a.style.borderRadius=t.style.borderRadius,a.style.height=e.height+"px",a.style.left=t.offsetLeft+"px",a.style.top=t.offsetTop+"px"}function B(t){if(o){if(!t)return void o.classList.add("yatra-display-none");o.classList.remove("yatra-display-none"),function(t){const e=t.getClientRects()[0];o.classList.remove("yatra-modal-in-between");const n=document.querySelector("html"),a=n.scrollWidth,l=n.scrollHeight;if(e.bottom+o.offsetHeight+i<l)return o.style.top=`${t.offsetTop+t.offsetHeight+i}px`,void(t.offsetLeft+o.offsetWidth<a?o.style.left=`${t.offsetLeft}px`:o.style.left=`${e.right-o.offsetWidth}px`);if(e.top-o.offsetHeight-i>0)return o.style.top=`${t.offsetTop-o.offsetHeight-i}px`,void(e.left+o.offsetWidth<a?o.style.left=`${e.left}px`:o.style.left=`${e.right-o.offsetWidth}px`);if(e.right+o.offsetWidth+i<a)return o.style.top=`${e.top}px`,void(o.style.left=`${e.left+e.width+i}px`);e.left-o.offsetWidth-i>0?(o.style.top=`${e.top}px`,o.style.left=`${e.left-o.offsetWidth-i}px`):(o.style.top=`${e.top}px`,o.style.left=`${e.left}px`,o.classList.add("yatra-modal-in-between"))}(t)}}function $(){l&&l.classList.remove("yatra-active-place")}})();export default YatraIntro;
+const YatraIntro = (()=>{
+    let yatraElements = null 
+    let transitionListener = null 
+    let yatraActiveIdx = -1
+    let yatraContentModel = null 
+    let yatraHoverElement = null 
+    let lastElement = null
+    let padding = 5; 
+    let customModalString = null;
+    let allowSkip = true;
+    let contentDiv = null;
+    let nextBtn = null;
+    let backBtn = null;
+    /**
+     * @param {Array} elements array containing selector(s) and message
+     * @param {Object} config { allowSkip : boolean(will skip tour on click of overlay div), padding : number(padding between active element and tour message), customModal : string(HTML string for custom tour modal) }
+     */
+    const YatraIntro = function(elements, config){
+        yatraElements = filterInitalElements(elements)
+        if(config && typeof config === 'object'){
+            if(config.padding && typeof config.padding == 'number'){
+                padding = config.padding;
+            }
+            if(Object.keys(config).includes('allowSkip')){
+                allowSkip = config.allowSkip;
+            }
+            if(config.customModal){
+                if(validateCustomDataModel(config.customModal)){
+                    customModalString = config.customModal;
+                }else{
+                    console.error('Invalid custom modal, reverting to default settings...')
+                }
+            }
+        }
+    }
+    YatraIntro.prototype.start = function(){
+        initializeYatraFlow();
+        next();
+    }
+    YatraIntro.prototype.next = function(){
+        next();
+    }
+    YatraIntro.prototype.skip = function(){ 
+        resetFlow();
+    }
+    YatraIntro.prototype.previous = function(){
+        previous()
+    }
+    YatraIntro.prototype.activeElement = function(){
+        return yatraElements[yatraActiveIdx].e;
+    }
+    YatraIntro.prototype.jumpTo = function(index){
+        if(yatraActiveIdx === -1){
+            initializeYatraFlow()
+        }
+        if(index >= 0 && index <= yatraElements.length - 1){
+            yatraActiveIdx = Number(index)
+            lastElement = startYatra()
+            modalControls()
+            onResizeYatraL()
+            return;
+        }
+        console.warn('Invalid index')
+    }
+    return YatraIntro;
+    //helpers
+    function createOverlay(classId){
+        const overLay = document.createElement('div');
+        overLay.classList.add(classId);
+        overLay.id = classId;
+        document.body.appendChild(overLay)
+        return overLay;
+    }
+    function initializeYatraFlow(){
+        yatraActiveIdx = -1;
+        yatraElements = filterInitalElements(elements);
+        if(customModalString){
+            document.body.innerHTML += customModalString
+        }else{
+            document.body.innerHTML += createDataModel()
+        }
+        
+        contentDiv = document.getElementById('yatra-data-content')
+        nextBtn = document.getElementById('yatra-data__next')
+        backBtn = document.getElementById('yatra-data__back')
+        yatraContentModel = document.getElementById('yatra-data-control'); //or init from user custom
+        yatraHoverElement = createOverlay('yatra-hover-element-overlay') //outline of active element
+        const overFlow = createOverlay('yatra-overlay-div') //overlay div to hide unwanted elements
+        if(!allowSkip){
+            overFlow.style.cursor = 'auto';
+        }
+        initializeListeners();
+    }
+    function filterInitalElements(elements){
+        let els = [];
+        elements.forEach((element, mainId) => {
+            const selectors = element.selector.split(' ');
+            selectors.forEach((selector, selectorId) => {
+                [...document.getElementsByClassName(selector)].forEach((ee, id) => {
+                    const classId = `YATRA-${mainId}-${selectorId}-${id}`;
+                    ee.classList.add(classId)
+                    els.push({ element : classId, message : element.message, e : document.getElementsByClassName(classId)[0] })
+                })
+            })
+        })
+        return els;
+    }
+    function createDataModel(){//default data model IFF not provided
+        return `
+        <div id="yatra-data-control" class="yatra-data-control">
+            <div id="yatra-data-content"></div>
+            <div class="yatra-data-controls">
+                <div id="yatra-data__next">Next</div>
+                <div id="yatra-data__back">Back</div>
+            </div>
+        </div>
+        `
+    }
+    function onResizeYatraL(){
+        toggleYatraModel(lastElement)
+        const ele = yatraElements[yatraActiveIdx];
+        if(ele){
+            setYatraOverlayDiv(document.getElementsByClassName(ele.element)[0])
+        }
+    }
+    function onOverlayClick(){
+        if(allowSkip){
+            resetFlow();
+        }
+    }
+    function next(){
+        if(yatraActiveIdx < yatraElements.length - 1){
+            yatraActiveIdx += 1;
+            modalControls()
+            lastElement = startYatra()
+            return;
+        }
+        resetFlow();
+    }
+    function previous(){
+        if(yatraActiveIdx > 0){
+            yatraActiveIdx -= 1;
+            lastElement = startYatra()
+        }
+        modalControls()
+    }
+    function initializeListeners(){
+        window.addEventListener('resize', onResizeYatraL, true)
+        document.getElementById('yatra-overlay-div').addEventListener('click', onOverlayClick.bind(this))
+        nextBtn.addEventListener('click', next.bind(this), true)
+        backBtn.addEventListener('click', previous.bind(this), true)
+    }
+    function removeListeners(){
+        window.removeEventListener('resize', onResizeYatraL, true)
+        document.getElementById('yatra-overlay-div').removeEventListener('click', onOverlayClick.bind(this))
+        yatraHoverElement.removeEventListener('transitionend',()=>{});
+        yatraElements.forEach(e => document.getElementsByClassName(e.element)[0].classList.remove(e.element))
+        nextBtn.removeEventListener('click', next.bind(this), true)
+        backBtn.removeEventListener('click', previous.bind(this), true)
+    }
+    function resetFlow(){
+        yatraActiveIdx = -1;
+        transitionListener = false;
+        removeListeners()
+        document.getElementById('yatra-data-control').remove();
+        document.getElementById('yatra-hover-element-overlay').remove();
+        document.getElementById('yatra-overlay-div').remove();
+        resetLastNode();
+    }
+    function startYatra(){
+        resetLastNode()
+        const yatraElement = document.getElementsByClassName(yatraElements[yatraActiveIdx].element)[0];
+        if(!transitionListener){
+            transitionListener = true;
+            yatraElement.classList.add('yatra-active-place')
+            yatraHoverElement.addEventListener('transitionend', () => {
+                const E = document.getElementsByClassName(yatraElements[yatraActiveIdx].element)[0];
+                E.classList.add('yatra-active-place')
+            })
+        }
+        window.scrollTo({ top : yatraElement.offsetTop, left : yatraElement.offsetLeft,  behavior : 'smooth' });
+        contentDiv.innerHTML = yatraElements[yatraActiveIdx].message;
+        setYatraOverlayDiv(yatraElement)
+        toggleYatraModel(yatraElement)
+        return yatraElement;
+    }
+    
+    function modalControls(){
+        if(yatraActiveIdx === 0){
+            backBtn.style.opacity = '0'
+            backBtn.style.pointerEvents = 'none'
+        }else{
+            backBtn.style.opacity = '1'
+            backBtn.style.pointerEvents = 'all'
+        }
+        if(yatraActiveIdx === yatraElements.length - 1){
+            nextBtn.innerHTML = 'Done'
+        }else{
+            nextBtn.innerHTML = 'Next'
+        }
+    }
+    
+    function setYatraOverlayDiv(element){
+        window.elementelement = element
+        const properties = element.getClientRects()[0];
+        yatraHoverElement.style.width = properties.width+"px";
+        yatraHoverElement.style.borderRadius = element.style.borderRadius;
+        yatraHoverElement.style.height = properties.height+"px";
+        yatraHoverElement.style.left = element.offsetLeft+"px";
+        yatraHoverElement.style.top = element.offsetTop+"px";
+    }
+    function toggleYatraModel(element){
+        if(yatraContentModel){
+            if(!element){
+                yatraContentModel.classList.add('yatra-display-none');
+                return;
+            }
+            yatraContentModel.classList.remove('yatra-display-none');
+            calculatePosition(element);
+        }
+    }
+    function calculatePosition(element){
+        //priority BOTTOM TOP RIGHT LEFT
+        const elementCoords = element.getClientRects()[0];
+        yatraContentModel.classList.remove('yatra-modal-in-between')
+        const dom = document.querySelector('html');
+        const fullWidth = dom.scrollWidth;
+        const fullHeight = dom.scrollHeight;
+        if(elementCoords.bottom + yatraContentModel.offsetHeight + padding< fullHeight){ 
+            //bottom free
+            yatraContentModel.style.top = `${element.offsetTop + element.offsetHeight + padding}px`;
+            if(element.offsetLeft + yatraContentModel.offsetWidth < fullWidth){
+                yatraContentModel.style.left = `${element.offsetLeft}px`;
+            }else{
+                yatraContentModel.style.left = `${ elementCoords.right - yatraContentModel.offsetWidth }px`;
+            }
+            return
+        }
+        if(elementCoords.top - yatraContentModel.offsetHeight - padding > 0){ 
+            //top free
+            yatraContentModel.style.top = `${element.offsetTop - yatraContentModel.offsetHeight - padding}px`;
+            if(elementCoords.left + yatraContentModel.offsetWidth < fullWidth){
+                yatraContentModel.style.left = `${elementCoords.left}px`;
+            }else{
+                yatraContentModel.style.left = `${ elementCoords.right - yatraContentModel.offsetWidth}px`;
+            }
+            return
+        }
+        if(elementCoords.right + yatraContentModel.offsetWidth + padding < fullWidth){ 
+            //right free
+            yatraContentModel.style.top = `${elementCoords.top }px`;
+            yatraContentModel.style.left = `${ elementCoords.left + elementCoords.width + padding}px`;
+            return
+        }
+        else if(elementCoords.left - yatraContentModel.offsetWidth - padding > 0){ //left free
+            yatraContentModel.style.top = `${elementCoords.top}px`;
+            yatraContentModel.style.left = `${ elementCoords.left - yatraContentModel.offsetWidth - padding }px`;
+        }
+        else{
+            //inside element to avoid overflow - worst case :(
+            yatraContentModel.style.top = `${elementCoords.top}px`;
+            yatraContentModel.style.left = `${ elementCoords.left}px`;
+            yatraContentModel.classList.add('yatra-modal-in-between')
+        }
+    }
+    function resetLastNode(){
+        if(lastElement) {
+            lastElement.classList.remove('yatra-active-place')
+        }
+    }
+
+    function validateCustomDataModel(innerHtml){
+        try{
+            const customModal = document.createElement('div');
+            customModal.classList.add('validating-custom-modal');
+            customModal.innerHTML = innerHtml;
+            return customModal.querySelector('validating-custom-modal>#yatra-data-control') &&//main modal
+            customModal.querySelector('#yatra-data-control>#yatra-data-content') && //content
+            customModal.querySelector('#yatra-data-control>#yatra-data__next') && //next btn
+            customModal.querySelector('#yatra-data-control>#yatra-data__back'); //back btn
+        }catch(e){
+            return false;
+        }
+    }
+})();
+export default YatraIntro;
