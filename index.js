@@ -16,6 +16,7 @@ const YatraIntro = (()=>{
      * @param {Object} config { allowSkip : boolean(will skip tour on click of overlay div), padding : number(padding between active element and tour message), customModal : string(HTML string for custom tour modal) }
      */
     const YatraIntro = function(elements, config){
+        this.elements = elements;
         yatraElements = filterInitalElements(elements)
         if(config && typeof config === 'object'){
             if(config.padding && typeof config.padding == 'number'){
@@ -28,13 +29,13 @@ const YatraIntro = (()=>{
                 if(validateCustomDataModel(config.customModal)){
                     customModalString = config.customModal;
                 }else{
-                    console.error('Invalid custom modal, reverting to default settings...')
+                    console.error('Invalid custom modal, reverting to default modal')
                 }
             }
         }
     }
     YatraIntro.prototype.start = function(){
-        initializeYatraFlow();
+        initializeYatraFlow(this.elements);
         next();
     }
     YatraIntro.prototype.next = function(){
@@ -50,17 +51,17 @@ const YatraIntro = (()=>{
         return yatraElements[yatraActiveIdx].e;
     }
     YatraIntro.prototype.jumpTo = function(index){
-        if(yatraActiveIdx === -1){
-            initializeYatraFlow()
-        }
         if(index >= 0 && index <= yatraElements.length - 1){
-            yatraActiveIdx = Number(index)
-            lastElement = startYatra()
-            modalControls()
-            onResizeYatraL()
+            if(yatraActiveIdx === -1){
+                initializeYatraFlow(this.elements)
+                yatraActiveIdx = Number(index)
+                lastElement = startYatra()
+                modalControls()
+                onResizeYatraL()
+            }
             return;
         }
-        console.warn('Invalid index')
+        console.error(`Invalid index ${index}`)
     }
     return YatraIntro;
     //helpers
@@ -71,7 +72,7 @@ const YatraIntro = (()=>{
         document.body.appendChild(overLay)
         return overLay;
     }
-    function initializeYatraFlow(){
+    function initializeYatraFlow(elements){
         yatraActiveIdx = -1;
         yatraElements = filterInitalElements(elements);
         if(customModalString){
@@ -283,4 +284,6 @@ const YatraIntro = (()=>{
         }
     }
 })();
-export default YatraIntro;
+if(typeof module !== 'undefined' && module.exports) {
+    module.exports.YatraIntro = YatraIntro
+}
