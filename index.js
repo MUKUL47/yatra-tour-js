@@ -15,10 +15,12 @@ const YatraIntro = (()=>{
     let contentDiv = null;
     let nextBtn = null;
     let backBtn = null;
-
+    /**
+     * @param {Array} elements array containing selector(s) and message
+     * @param {Object} config { allowSkip : boolean(will skip tour on click of overlay div), padding : number(padding between active element and tour message), customModal : string(HTML string for custom tour modal) }
+     */
     const YatraIntro = function(elements, config){
         yatraElements = filterInitalElements(elements)
-        //init config
         if(config && typeof config === 'object'){
             if(config.padding && typeof config.padding == 'number'){
                 padding = config.padding;
@@ -30,7 +32,7 @@ const YatraIntro = (()=>{
                 if(validateCustomDataModel(config.customModal)){
                     customModalString = config.customModal;
                 }else{
-                    console.warn('Invalid custom modal, reverting to default settings...')
+                    console.error('Invalid custom modal, reverting to default settings...')
                 }
             }
         }
@@ -47,6 +49,9 @@ const YatraIntro = (()=>{
     }
     YatraIntro.prototype.previous = function(){
         previous()
+    }
+    YatraIntro.prototype.activeElement = function(){
+        return yatraElements[yatraActiveIdx].e;
     }
     YatraIntro.prototype.jumpTo = function(index){
         if(yatraActiveIdx === -1){
@@ -79,14 +84,14 @@ const YatraIntro = (()=>{
             document.body.innerHTML += createDataModel()
         }
         
-        contentDiv = document.getElementById('yatra-data-control')
+        contentDiv = document.getElementById('yatra-data-content')
         nextBtn = document.getElementById('yatra-data__next')
         backBtn = document.getElementById('yatra-data__back')
         yatraContentModel = document.getElementById('yatra-data-control'); //or init from user custom
         yatraHoverElement = createOverlay('yatra-hover-element-overlay') //outline of active element
         const overFlow = createOverlay('yatra-overlay-div') //overlay div to hide unwanted elements
         if(!allowSkip){
-            overFlow.style.cursor = 'none';
+            overFlow.style.cursor = 'auto';
         }
         initializeListeners();
     }
@@ -107,7 +112,7 @@ const YatraIntro = (()=>{
     function createDataModel(){//default data model IFF not provided
         return `
         <div id="yatra-data-control" class="yatra-data-control">
-            <div id="yatra-data-content">123</div>
+            <div id="yatra-data-content"></div>
             <div class="yatra-data-controls">
                 <div id="yatra-data__next">Next</div>
                 <div id="yatra-data__back">Back</div>
@@ -178,7 +183,7 @@ const YatraIntro = (()=>{
             })
         }
         window.scrollTo({ top : yatraElement.offsetTop, left : yatraElement.offsetLeft,  behavior : 'smooth' });
-        // const yatraData = Object.values(yatraElement.attributes).find(attr => attr.nodeName === 'yatra-data').value;
+        contentDiv.innerHTML = yatraElements[yatraActiveIdx].message;
         setYatraOverlayDiv(yatraElement)
         toggleYatraModel(yatraElement)
         return yatraElement;

@@ -1,0 +1,20 @@
+{
+  "name": "yatra-tour-js",
+  "version": "1.0.0",
+  "description": "Simple and lightweight site tour library",
+  "main": "index.js",
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MUKUL47/yatra-tour-js.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MUKUL47/yatra-tour-js/issues"
+  },
+  "homepage": "https://github.com/MUKUL47/yatra-tour-js#readme",
+  "dependencies": {
+  }
+}

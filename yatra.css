@@ -34,9 +34,9 @@
     min-width: 180px;
     display: inline-block;
 }
-.yatra-data-control>div:nth-child(2){
+#yatra-data-content{
     font-family: sans-serif;
-    padding: 25px 10px;
+    padding: 15px 10px;
     display: flex;
     font-size: 22px;
     text-align: left;
