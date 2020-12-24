@@ -2,16 +2,19 @@
 
 ### installation
 
-#### Add CDN for default tour modal (https://npmcdn.com/yatra-tour-js@latest/yatra.css)
+#### Add CDN for default tour modal (https://npmcdn.com/yatra-tour-js@latest/yatra.css) *required*
 
 ### install package
 ```
 npm i yatra-tour-js
 ```
+#### or using script
+```
+<script src="https://npmcdn.com/yatra-tour-js@latest/index.js" type="text/javascript"></script>
+```
 
 ### usage
 ```
-import YatraIntro from 'yatra-tour-js'
 const elements = [
     {
         selector : 'someclass',
