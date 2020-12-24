@@ -21,7 +21,7 @@ const elements = [
         message : 'Hi there'
     }, {
         selector : 'someclass1 someclass2',
-        message : 'Same message for different ids or classes'
+        message : 'Same message for different classes'
     }
 ];
 const config = {padding : 10, allowSkip : false, overlayOpacity : .3};
