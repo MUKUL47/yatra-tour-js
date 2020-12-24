@@ -1,15 +1,21 @@
-import YatraIntro from '../index';
 const elements = [
     {
-        selector : 'text',
-        message : 'This is a text message1'
-    }, {
-        selector : 'text1 text2',
-        message : 'This is a text message2'
-    }, {
-        selector : 'text3',
-        message : 'This is a text message3'
+        selector : '1',
+        message : `Modal is placed based on free space priority 
+        (BOTTOM, TOP, LEFT, RIGHT and in between with opacity 0.5 since there's no space`
+    },
+    {
+        selector : '3',
+        message : 'Outline is adjusted automatically'
+    },
+    {
+        selector : '2',
+        message : 'Same Message for 2 different classes'
+    },
+    {
+        selector : '5',
+        message : 'Auto scroll into view'
     }
 ]
-const yatra = new YatraIntro(elements, {});
-yatra.start()
+new YatraIntro(elements, {allowSkip : true, padding : 20, overlayOpacity : .2}).start()
+

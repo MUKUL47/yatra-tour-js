@@ -11,9 +11,17 @@ const YatraIntro = (()=>{
     let contentDiv = null;
     let nextBtn = null;
     let backBtn = null;
+    let overlayOpacity = null;
+    const dom = document.querySelector('html');
+    let fullWidth = dom.scrollWidth;
+    let fullHeight = dom.scrollHeight;
     /**
      * @param {Array} elements array containing selector(s) and message
-     * @param {Object} config { allowSkip : boolean(will skip tour on click of overlay div), padding : number(padding between active element and tour message), customModal : string(HTML string for custom tour modal) }
+     * @param {Object} config { 
+     * allowSkip : boolean(will skip tour on click of overlay div), 
+     * padding : number(padding between active element and tour message), 
+     * customModal : string(HTML string for custom tour modal),
+     * overlayOpacity : number(overlay div opacity)}
      */
     const YatraIntro = function(elements, config){
         this.elements = elements;
@@ -32,9 +40,16 @@ const YatraIntro = (()=>{
                     console.error('Invalid custom modal, reverting to default modal')
                 }
             }
+            if(config.overlayOpacity && typeof config.overlayOpacity === 'number'){
+                overlayOpacity = config.overlayOpacity;
+            }
         }
     }
     YatraIntro.prototype.start = function(){
+        if(contentDiv) {
+            console.error('tour already running')
+            return
+        }
         initializeYatraFlow(this.elements);
         next();
     }
@@ -80,7 +95,6 @@ const YatraIntro = (()=>{
         }else{
             document.body.innerHTML += createDataModel()
         }
-        
         contentDiv = document.getElementById('yatra-data-content')
         nextBtn = document.getElementById('yatra-data__next')
         backBtn = document.getElementById('yatra-data__back')
@@ -89,6 +103,9 @@ const YatraIntro = (()=>{
         const overFlow = createOverlay('yatra-overlay-div') //overlay div to hide unwanted elements
         if(!allowSkip){
             overFlow.style.cursor = 'auto';
+        }
+        if(overlayOpacity){
+            overFlow.style.opacity = overlayOpacity;
         }
         initializeListeners();
     }
@@ -100,7 +117,8 @@ const YatraIntro = (()=>{
                 [...document.getElementsByClassName(selector)].forEach((ee, id) => {
                     const classId = `YATRA-${mainId}-${selectorId}-${id}`;
                     ee.classList.add(classId)
-                    els.push({ element : classId, message : element.message, e : document.getElementsByClassName(classId)[0] })
+                    let EEE = document.getElementsByClassName(classId)[0];
+                    els.push({ element : classId, message : element.message, e : EEE })
                 })
             })
         })
@@ -118,6 +136,8 @@ const YatraIntro = (()=>{
         `
     }
     function onResizeYatraL(){
+        fullWidth = dom.scrollWidth;
+        fullHeight = dom.scrollHeight;
         toggleYatraModel(lastElement)
         const ele = yatraElements[yatraActiveIdx];
         if(ele){
@@ -167,6 +187,18 @@ const YatraIntro = (()=>{
         document.getElementById('yatra-hover-element-overlay').remove();
         document.getElementById('yatra-overlay-div').remove();
         resetLastNode();
+        yatraElements = null 
+        transitionListener = null 
+        yatraActiveIdx = -1
+        yatraContentModel = null 
+        yatraHoverElement = null 
+        lastElement = null
+        customModalString = null;
+        allowSkip = true;
+        contentDiv = null;
+        nextBtn = null;
+        backBtn = null;
+        overlayOpacity = null;
     }
     function startYatra(){
         resetLastNode()
@@ -181,8 +213,8 @@ const YatraIntro = (()=>{
         }
         window.scrollTo({ top : yatraElement.offsetTop, left : yatraElement.offsetLeft,  behavior : 'smooth' });
         contentDiv.innerHTML = yatraElements[yatraActiveIdx].message;
-        setYatraOverlayDiv(yatraElement)
         toggleYatraModel(yatraElement)
+        setYatraOverlayDiv(yatraElement)
         return yatraElement;
     }
     
@@ -202,7 +234,6 @@ const YatraIntro = (()=>{
     }
     
     function setYatraOverlayDiv(element){
-        window.elementelement = element
         const properties = element.getClientRects()[0];
         yatraHoverElement.style.width = properties.width+"px";
         yatraHoverElement.style.borderRadius = element.style.borderRadius;
@@ -222,45 +253,38 @@ const YatraIntro = (()=>{
     }
     function calculatePosition(element){
         //priority BOTTOM TOP RIGHT LEFT
-        const elementCoords = element.getClientRects()[0];
         yatraContentModel.classList.remove('yatra-modal-in-between')
-        const dom = document.querySelector('html');
-        const fullWidth = dom.scrollWidth;
-        const fullHeight = dom.scrollHeight;
-        if(elementCoords.bottom + yatraContentModel.offsetHeight + padding< fullHeight){ 
-            //bottom free
-            yatraContentModel.style.top = `${element.offsetTop + element.offsetHeight + padding}px`;
+        const space = yatraElements[yatraActiveIdx].space;
+        const findXAxis = () => {
             if(element.offsetLeft + yatraContentModel.offsetWidth < fullWidth){
                 yatraContentModel.style.left = `${element.offsetLeft}px`;
             }else{
-                yatraContentModel.style.left = `${ elementCoords.right - yatraContentModel.offsetWidth }px`;
+                yatraContentModel.style.left = `${ (element.offsetLeft + element.offsetWidth) - yatraContentModel.offsetWidth}px`;
             }
-            return
         }
-        if(elementCoords.top - yatraContentModel.offsetHeight - padding > 0){ 
+        if(yatraContentModel.offsetHeight + padding < fullHeight - (element.offsetTop + element.offsetHeight)){ 
+            yatraContentModel.style.top = `${element.offsetTop + element.offsetHeight + padding}px`;
+            findXAxis()
+        }
+        else if(yatraContentModel.offsetHeight + padding < element.offsetTop){ 
             //top free
             yatraContentModel.style.top = `${element.offsetTop - yatraContentModel.offsetHeight - padding}px`;
-            if(elementCoords.left + yatraContentModel.offsetWidth < fullWidth){
-                yatraContentModel.style.left = `${elementCoords.left}px`;
-            }else{
-                yatraContentModel.style.left = `${ elementCoords.right - yatraContentModel.offsetWidth}px`;
-            }
-            return
+            findXAxis()
         }
-        if(elementCoords.right + yatraContentModel.offsetWidth + padding < fullWidth){ 
+        else if(yatraContentModel.offsetWidth + padding < fullWidth - (element.offsetLeft + element.offsetWidth)){ 
             //right free
-            yatraContentModel.style.top = `${elementCoords.top }px`;
-            yatraContentModel.style.left = `${ elementCoords.left + elementCoords.width + padding}px`;
+            yatraContentModel.style.top = `${element.offsetTop}px`;
+            yatraContentModel.style.left = `${ element.offsetLeft + element.offsetWidth + padding}px`;
             return
         }
-        else if(elementCoords.left - yatraContentModel.offsetWidth - padding > 0){ //left free
-            yatraContentModel.style.top = `${elementCoords.top}px`;
-            yatraContentModel.style.left = `${ elementCoords.left - yatraContentModel.offsetWidth - padding }px`;
+        else if(yatraContentModel.offsetWidth + padding < element.offsetLeft){ //left free
+            yatraContentModel.style.top = `${element.offsetTop}px`;
+            yatraContentModel.style.left = `${ element.offsetLeft - yatraContentModel.offsetWidth - padding }px`;
         }
         else{
-            //inside element to avoid overflow - worst case :(
-            yatraContentModel.style.top = `${elementCoords.top}px`;
-            yatraContentModel.style.left = `${ elementCoords.left}px`;
+            //inside
+            yatraContentModel.style.top = `${element.offsetTop}px`;
+            yatraContentModel.style.left = `${ element.offsetLeft}px`;
             yatraContentModel.classList.add('yatra-modal-in-between')
         }
     }

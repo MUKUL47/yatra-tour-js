@@ -14,14 +14,14 @@ npm i yatra-tour-js
 import YatraIntro from 'yatra-tour-js'
 const elements = [
     {
-        selector : '.someclass',
+        selector : 'someclass',
         message : 'Hi there'
     }, {
-        selector : '.someclass1 #someclass2',
+        selector : 'someclass1 someclass2',
         message : 'Same message for different ids or classes'
     }
 ];
-const config = {padding : 10, allowSkip : false};
+const config = {padding : 10, allowSkip : false, overlayOpacity : .3};
 const yatra = new YatraIntro(elements, config);
 yatra.start()
 ```
@@ -33,6 +33,7 @@ Config | Definition | Type
 padding | Padding between actual tour modal and active element | Number
 allowSkip | Skip ongoing tour in between (true by default) |  Boolean
 customModal | custom tour modal having %content%, %next_button% & %back_button% as HTML string | String
+overlayOpacity | adjust opacity of overlay div | number
 
 
 ### Custom tour modal template
