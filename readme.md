@@ -3,9 +3,9 @@
 ### installation
 
 #### Add CDN for default tour modal
-```
+
 <a src="https://npmcdn.com/yatra-tour-js@latest/yatra.css"/>
-```
+
 ### install package
 ```
 npm i yatra-tour-js
