@@ -49,3 +49,5 @@ overlayOpacity | adjust opacity of overlay div | number
         </div>
     </div>
 ```
+
+![Demo](https://github.com/MUKUL47/yatra-tour-js/blob/main/test/tour-demo.gif "Title")
