@@ -4,14 +4,14 @@
 
 #### Add CDN for default tour modal
 ```
-https://github.com/MUKUL47/jsonvalidator/edit/main/readme.md
+https://npmcdn.com/yatra-tour-js@latest/yatra.css
 ```
-
+### install package
 ```
 npm i yatra-tour-js
 ```
 
-### implementation
+### usage
 ```
 import YatraIntro from 'yatra-tour-js'
 const elements = [
