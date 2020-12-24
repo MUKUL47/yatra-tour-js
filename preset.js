@@ -19,7 +19,7 @@ let yatraActiveIdx = -1 //active yatra index
 let yatraContentModel = null //will hold content model (data, skip, next, previous)
 let yatraHoverElement = null //will hold hover outlining active element
 let lastElement = null
-let padding = 8; //padding btw active element and modal
+let padding = 5; //padding btw active element and modal
 //INIT-VARS-END
 
 // -----------------------------------------------------------------
@@ -47,7 +47,7 @@ function setYatraOverlayDiv(element){
     yatraHoverElement.style.width = properties.width+"px";
     yatraHoverElement.style.borderRadius = element.style.borderRadius;
     yatraHoverElement.style.height = properties.height+"px";
-    yatraHoverElement.style.left = element.offsetLeft+"px";;
+    yatraHoverElement.style.left = element.offsetLeft+"px";
     yatraHoverElement.style.top = element.offsetTop+"px";
 }
 function toggleYatraModel(element){
@@ -61,33 +61,51 @@ function toggleYatraModel(element){
     }
 }
 function calculatePosition(element){
-    if(element.getClientRects()[0].height + yatraContentModel.offsetHeight < window.innerHeight){ //check bottom area
-        console.log('bottom free', element.getClientRects()[0].height , yatraContentModel.offsetHeight , window.innerHeight)
-        yatraContentModel.style.top = `${element.getClientRects()[0].height}px`;
-        if(element.getClientRects()[0].left + yatraContentModel.offsetWidth < window.innerWidth){
-            console.log('bottom right free')
-            yatraContentModel.style.left = `${element.getClientRects()[0].left}px`;
+    //priority BOTTOM TOP RIGHT LEFT
+    const elementCoords = element.getClientRects()[0];
+    yatraContentModel.classList.remove('yatra-modal-in-between')
+    const dom = document.querySelector('html');
+    const fullWidth = dom.scrollWidth;
+    const fullHeight = dom.scrollHeight;
+    if(elementCoords.bottom + yatraContentModel.offsetHeight + padding< fullHeight){ 
+        //bottom free
+        yatraContentModel.style.top = `${element.offsetTop + element.offsetHeight + padding}px`;
+        if(element.offsetLeft + yatraContentModel.offsetWidth < fullWidth){
+            yatraContentModel.style.left = `${element.offsetLeft}px`;
         }else{
-            console.log('bottom left free')
-            yatraContentModel.style.left = `${ element.getClientRects()[0].right - yatraContentModel.offsetWidth}px`;
+            yatraContentModel.style.left = `${ elementCoords.right - yatraContentModel.offsetWidth }px`;
         }
         return
     }
-    else if(element.getClientRects()[0].top -yatraContentModel.offsetHeight > 0){ //check right area
-        console.log('top free')
+    if(elementCoords.top - yatraContentModel.offsetHeight - padding > 0){ 
+        //top free
+        console.log('top')
+        yatraContentModel.style.top = `${element.offsetTop - yatraContentModel.offsetHeight - padding}px`;
+        if(elementCoords.left + yatraContentModel.offsetWidth < fullWidth){
+            yatraContentModel.style.left = `${elementCoords.left}px`;
+        }else{
+            yatraContentModel.style.left = `${ elementCoords.right - yatraContentModel.offsetWidth}px`;
+        }
         return
     }
-    else if(element.getClientRects()[0].right + yatraContentModel.offsetWidth < window.innerWidth){ //check top area
-        console.log('right free')
-        yatraContentModel.style.top = `${element.getClientRects()[0].top}px`;
-        yatraContentModel.style.left = `${ element.getClientRects()[0].left + yatraContentModel.offsetWidth}px`;
+    if(elementCoords.right + yatraContentModel.offsetWidth + padding < fullWidth){ 
+        //right free
+        console.log('right')
+        yatraContentModel.style.top = `${elementCoords.top }px`;
+        yatraContentModel.style.left = `${ elementCoords.left + elementCoords.width + padding}px`;
         return
     }
-    else{ //left area
-        console.log('left free')
-        yatraContentModel.style.top = `${element.getClientRects()[0].top}`;
-        yatraContentModel.style.left = `${ element.getClientRects()[0].left - yatraContentModel.offsetWidth}px`;
-       
+    else if(elementCoords.left - yatraContentModel.offsetWidth - padding > 0){ //left free
+        console.log('left')
+        yatraContentModel.style.top = `${elementCoords.top}px`;
+        yatraContentModel.style.left = `${ elementCoords.left - yatraContentModel.offsetWidth - padding }px`;
+    }
+    else{
+        //inside element to avoid overflow - worst case :(
+        yatraContentModel.style.top = `${elementCoords.top}px`;
+        yatraContentModel.style.left = `${ elementCoords.left}px`;
+        yatraContentModel.classList.add('yatra-modal-in-between')
+        console.log('inside')
     }
 }
 function resetLastNode(){
@@ -99,12 +117,11 @@ function resetLastNode(){
 
 function filterInitalElements(elements){
     let els = [];
-    elements.forEach((element, id) => {
+    elements.forEach((element, mainId) => {
         const selectors = element.selector.split(' ');
         selectors.forEach((selector, selectorId) => {
-            const es = [...document.getElementsByClassName(selector)];
-            es.forEach((ee, id1) => {
-                const classId = `YATRA-ID-${id}-${selectorId}-${id1}`;
+            [...document.getElementsByClassName(selector)].forEach((ee, id) => {
+                const classId = `YATRA-${mainId}-${selectorId}-${id}`;
                 ee.classList.add(classId)
                 els.push({ element : classId, message : element.message, e : document.getElementsByClassName(classId)[0] })
             })
@@ -117,7 +134,6 @@ function createDataModel(){//default data model IFF not provided
     return `
     <div id="yatra-data-control" class="yatra-data-control yatra-display-none">
         <div class='yatra-data-close'>
-            <div id="yatra-data-close-modal">x</div>
         </div>
         <div id="yatra-data-content">Hey There!!!</div>
         <div class="yatra-data-controls">
@@ -144,22 +160,26 @@ function initializeYatraFlow(){
     createOverlay('yatra-overlay-div') //overlay div to hide unwanted elements
     initListeners();
 }
-function onResizeYatraL(){
-    setYatraOverlayDiv(document.getElementsByClassName(yatraElements[yatraActiveIdx].element)[0])
+const onResizeYatraL = () =>{
     toggleYatraModel(lastElement)
+    const ele = yatraElements[yatraActiveIdx];
+    if(ele){
+        setYatraOverlayDiv(document.getElementsByClassName(ele.element)[0])
+    }
 }
 function onOverlayClick(){
     resetFlow();
 }
 function initListeners(){
-    window.addEventListener('resize', onResizeYatraL.bind(this))
+    window.addEventListener('resize', onResizeYatraL, true)
     document.getElementById('yatra-overlay-div').addEventListener('click', onOverlayClick.bind(this))
 }
 function removeListeners(){
     console.log('removing listeners')
-    window.removeEventListener('resize', onResizeYatraL.bind(this))
+    window.removeEventListener('resize', onResizeYatraL, true)
     document.getElementById('yatra-overlay-div').removeEventListener('click', onOverlayClick.bind(this))
     yatraHoverElement.removeEventListener('transitionend',()=>{});
+    yatraElements.forEach(e => document.getElementsByClassName(e.element)[0].classList.remove(e.element))
 }
 function next(){
     if(yatraActiveIdx < yatraElements.length - 1){
@@ -197,7 +217,7 @@ function modalControls(){
         yatraModalBack.style.pointerEvents = 'all'
     }
     if(yatraActiveIdx === yatraElements.length - 1){
-        yatraModalNext.innerHTML = 'Finish'
+        yatraModalNext.innerHTML = 'Done'
     }else{
         yatraModalNext.innerHTML = 'Next'
     }
@@ -217,5 +237,6 @@ const onNav = () =>{
         yatraActiveIdx = Number(v)
         lastElement = startYatra()
         modalControls()
+        onResizeYatraL()
     }
 }
