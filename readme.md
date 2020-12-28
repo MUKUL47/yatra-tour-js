@@ -38,6 +38,14 @@ allowSkip | Skip ongoing tour in between (true by default) |  Boolean
 customModal | custom tour modal having %content%, %next_button% & %back_button% as HTML string | String
 overlayOpacity | adjust opacity of overlay div | number
 
+### Optional callback
+
+```
+new YatraIntro(elements, null, onUserAction.bind(this)).start()
+function onUserAction(action){
+    //action = next | previous | skipped | completed
+}
+```
 
 ### Custom tour modal template
 ```
