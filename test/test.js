@@ -17,5 +17,6 @@ const elements = [
         message : 'Auto scroll into view'
     }
 ]
-new YatraIntro(elements, {allowSkip : true, padding : 20, overlayOpacity : .2}).start()
+const cb = action =>{ console.log(action) }
+new YatraIntro(elements, {allowSkip : true, padding : 20, overlayOpacity : .2}, cb).start()
 

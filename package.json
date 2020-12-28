@@ -1,6 +1,6 @@
 {
   "name": "yatra-tour-js",
-  "version": "1.0.302",
+  "version": "1.0.4",
   "description": "Simple and lightweight site tour library",
   "main": "index.js",
   "scripts": {

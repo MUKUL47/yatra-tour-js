@@ -15,6 +15,7 @@ const YatraIntro = (()=>{
     const dom = document.querySelector('html');
     let fullWidth = dom.scrollWidth;
     let fullHeight = dom.scrollHeight;
+    let callback;
     /**
      * @param {Array} elements array containing selector(s) and message
      * @param {Object} config { 
@@ -23,13 +24,11 @@ const YatraIntro = (()=>{
      * customModal : string(HTML string for custom tour modal),
      * overlayOpacity : number(overlay div opacity)}
      */
-    const YatraIntro = function(elements, config){
+    const YatraIntro = function(elements, config, cb){
         this.elements = elements;
+        callback = typeof cb === 'function' ? cb : null;
         yatraElements = filterInitalElements(elements)
         if(config && typeof config === 'object'){
-            if(config.padding && typeof config.padding == 'number'){
-                padding = config.padding;
-            }
             if(Object.keys(config).includes('allowSkip')){
                 allowSkip = config.allowSkip;
             }
@@ -40,10 +39,12 @@ const YatraIntro = (()=>{
                     console.error('Invalid custom modal, reverting to default modal')
                 }
             }
-            if(config.overlayOpacity && typeof config.overlayOpacity === 'number'){
-                overlayOpacity = config.overlayOpacity;
-            }
+            padding = config.padding && typeof config.padding == 'number' ? config.padding : null;
+            overlayOpacity = config.overlayOpacity && typeof config.overlayOpacity === 'number' ? config.overlayOpacity : null;
         }
+    }
+    function sendCallBack(type){
+        if(callback) callback(type)
     }
     YatraIntro.prototype.start = function(){
         if(contentDiv) {
@@ -58,12 +59,17 @@ const YatraIntro = (()=>{
     }
     YatraIntro.prototype.skip = function(){ 
         resetFlow();
+        sendCallBack('skipped')
     }
     YatraIntro.prototype.previous = function(){
         previous()
+        sendCallBack('previous')
     }
     YatraIntro.prototype.activeElement = function(){
         return yatraElements[yatraActiveIdx].e;
+    }
+    YatraIntro.prototype.getAttractions = function(){
+        return yatraElements;
     }
     YatraIntro.prototype.jumpTo = function(index){
         if(index >= 0 && index <= yatraElements.length - 1){
@@ -90,23 +96,15 @@ const YatraIntro = (()=>{
     function initializeYatraFlow(elements){
         yatraActiveIdx = -1;
         yatraElements = filterInitalElements(elements);
-        if(customModalString){
-            document.body.innerHTML += customModalString
-        }else{
-            document.body.innerHTML += createDataModel()
-        }
+        document.body.innerHTML += customModalString ? customModalString : createDataModel()
         contentDiv = document.getElementById('yatra-data-content')
         nextBtn = document.getElementById('yatra-data__next')
         backBtn = document.getElementById('yatra-data__back')
         yatraContentModel = document.getElementById('yatra-data-control'); //or init from user custom
         yatraHoverElement = createOverlay('yatra-hover-element-overlay') //outline of active element
         const overFlow = createOverlay('yatra-overlay-div') //overlay div to hide unwanted elements
-        if(!allowSkip){
-            overFlow.style.cursor = 'auto';
-        }
-        if(overlayOpacity){
-            overFlow.style.opacity = overlayOpacity;
-        }
+        overFlow.style.cursor = allowSkip ? 'pointer' : 'auto';
+        overFlow.style.opacity = overlayOpacity || .5;
         initializeListeners();
     }
     function filterInitalElements(elements){
@@ -154,20 +152,28 @@ const YatraIntro = (()=>{
             yatraActiveIdx += 1;
             modalControls()
             lastElement = startYatra()
+            if(yatraActiveIdx > 0){
+                sendCallBack('next')
+            }
             return;
         }
+        sendCallBack('completed')
         resetFlow();
     }
     function previous(){
         if(yatraActiveIdx > 0){
             yatraActiveIdx -= 1;
             lastElement = startYatra()
+            sendCallBack('previous')
         }
         modalControls()
     }
     function initializeListeners(){
         window.addEventListener('resize', onResizeYatraL, true)
-        document.getElementById('yatra-overlay-div').addEventListener('click', onOverlayClick.bind(this))
+        document.getElementById('yatra-overlay-div').addEventListener('click',() => {
+            onOverlayClick()
+            sendCallBack('skipped')
+        })
         nextBtn.addEventListener('click', next.bind(this), true)
         backBtn.addEventListener('click', previous.bind(this), true)
     }
